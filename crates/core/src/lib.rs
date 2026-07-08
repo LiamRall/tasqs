@@ -1,5 +1,43 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
+/// A Project: the top-level container for Items (see CONTEXT.md).
+/// Identified by a unique, filename-safe `slug`; shown to humans by `name`.
+#[derive(Debug, Clone, PartialEq)]
+pub struct Project {
+    pub slug: Slug,
+    pub name: String,
+}
+
+/// A validated Project slug: lowercase, non-empty, filename-safe.
+/// The inner `String` is private, so the only way to obtain a `Slug`
+/// is through `Slug::parse` — a value of this type is always valid.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct Slug(String);
+
+/// Why a string was rejected as a slug.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum SlugError {
+    Empty,
+    InvalidCharacter(char),
+}
+
+impl Slug {
+    /// Validate `input` and wrap it as a `Slug`, or explain why it's invalid.
+    pub fn parse(input: &str) -> Result<Slug, SlugError> {
+        if input.is_empty() {
+            return Err(SlugError::Empty);
+        }
+        for ch in input.chars() {
+            let ok = ch.is_ascii_lowercase() || ch.is_ascii_digit() || ch == '-';
+            if !ok {
+                return Err(SlugError::InvalidCharacter(ch));
+            }
+        }
+        Ok(Slug(input.to_string()))
+    }
+
+    /// Borrow the validated slug as a string slice (e.g. for filenames).
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
 }
 
 #[cfg(test)]
@@ -7,8 +45,30 @@ mod tests {
     use super::*;
 
     #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
+    fn project_holds_a_valid_slug() {
+        let p = Project {
+            slug: Slug::parse("tasqs").unwrap(),
+            name: String::from("Tasqs"),
+        };
+        assert_eq!(p.slug.as_str(), "tasqs");
+        assert_eq!(p.name, "Tasqs");
+    }
+
+    #[test]
+    fn parse_accepts_lowercase_alphanumeric_and_hyphens() {
+        assert!(Slug::parse("my-project-2").is_ok());
+    }
+
+    #[test]
+    fn parse_rejects_empty() {
+        assert_eq!(Slug::parse(""), Err(SlugError::Empty));
+    }
+
+    // YOUR TURN: write a test named `parse_rejects_uppercase` that asserts
+    // `Slug::parse("Tasqs")` returns Err(SlugError::InvalidCharacter('T')).
+    // Hint: mirror the `parse_rejects_empty` test above.
+    #[test]
+    fn parse_rejects_uppercase() {
+        assert_eq!(Slug::parse("Tasqs"), Err(SlugError::InvalidCharacter('T')));
     }
 }

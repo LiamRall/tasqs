@@ -12,3 +12,5 @@ repository = "https://github.com/LiamRall/tasqs"
 tasqs-core = { path = "crates/core" }
 tasqs-cli  = { path = "crates/cli" }
 tasqs-tui  = { path = "crates/tui" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"

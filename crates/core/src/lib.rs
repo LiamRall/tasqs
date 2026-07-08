@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+pub mod storage;
+
 /// A Project: the top-level container for Items (see CONTEXT.md).
 /// Identified by a unique, filename-safe `slug`; shown to humans by `name`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
